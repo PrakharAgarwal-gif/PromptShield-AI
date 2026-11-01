@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.sqlite3
+*.db
+test_*.db
+
+# Node.js / Next.js
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and IDE
+.env.local
+.env.*.local
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+docker-compose*.override.yml

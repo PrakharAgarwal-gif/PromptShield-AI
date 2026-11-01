@@ -22,8 +22,9 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set database URL dynamically from application settings
-config.set_main_option("sqlalchemy.url", settings.sqlalchemy_database_uri)
+# Set database URL dynamically from application settings if not explicitly provided
+if not config.get_main_option("sqlalchemy.url"):
+    config.set_main_option("sqlalchemy.url", settings.sqlalchemy_database_uri)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -61,18 +62,30 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    configuration = config.get_section(config.config_ini_section) or {}
-    configuration["sqlalchemy.url"] = settings.sqlalchemy_database_uri
+    connectable = config.attributes.get("connection", None)
 
-    connectable = engine_from_config(
-        configuration,
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    if connectable is None:
+        configuration = config.get_section(config.config_ini_section) or {}
+        target_url = config.get_main_option("sqlalchemy.url") or settings.sqlalchemy_database_uri
+        configuration["sqlalchemy.url"] = target_url
 
-    with connectable.connect() as connection:
+        connectable = engine_from_config(
+            configuration,
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
+        )
+
+        with connectable.connect() as connection:
+            context.configure(
+                connection=connection,
+                target_metadata=target_metadata,
+            )
+
+            with context.begin_transaction():
+                context.run_migrations()
+    else:
         context.configure(
-            connection=connection,
+            connection=connectable,
             target_metadata=target_metadata,
         )
 

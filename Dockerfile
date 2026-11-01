@@ -1,4 +1,4 @@
-# Multi-stage production Dockerfile for CloudOps Sentinel API
+# Multi-stage production Dockerfile for CloudOps Sentinel Backend API
 FROM python:3.12-slim AS builder
 
 WORKDIR /app
@@ -9,13 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies in a virtual environment
+# Install python dependencies in an isolated virtual environment
 COPY requirements.txt .
 RUN python -m venv /opt/venv && \
     /opt/venv/bin/pip install --no-cache-dir --upgrade pip && \
     /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
-# Final runtime image
+# Final minimal runtime image
 FROM python:3.12-slim AS runner
 
 WORKDIR /app
@@ -34,14 +34,16 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN addgroup --system --gid 1001 sentinel && \
     adduser --system --uid 1001 --ingroup sentinel sentinel
 
-# Copy application source code and migrations
+# Copy application source code, migrations, and entrypoint
 COPY app /app/app
 COPY alembic /app/alembic
 COPY alembic.ini /app/alembic.ini
 COPY .env.example /app/.env.example
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 
-# Set ownership to unprivileged user
-RUN chown -R sentinel:sentinel /app
+# Set executable permissions and user ownership
+RUN chmod +x /app/docker-entrypoint.sh && \
+    chown -R sentinel:sentinel /app
 
 USER sentinel
 
@@ -49,9 +51,10 @@ USER sentinel
 EXPOSE 8000
 
 # Health check probe
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=20s --timeout=5s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Launch production ASGI server
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-

@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   # ==============================================================================
-  # Primary PostgreSQL Database
+  # Primary PostgreSQL Database Container
   # ==============================================================================
   postgres:
     image: postgres:16-alpine
@@ -26,7 +24,7 @@ services:
       - sentinel-network
 
   # ==============================================================================
-  # CloudOps Sentinel Backend API
+  # CloudOps Sentinel Backend API Container (FastAPI)
   # ==============================================================================
   api:
     build:
@@ -61,16 +59,51 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     networks:
       - sentinel-network
 
+  # ==============================================================================
+  # CloudOps Sentinel Dashboard Frontend Container (Next.js)
+  # ==============================================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+    container_name: cloudops-sentinel-frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+      INTERNAL_API_URL: http://api:8000
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - sentinel-network
+
+# ==============================================================================
+# Persistent Storage Volumes
+# ==============================================================================
 volumes:
   postgres_data:
     name: cloudops_sentinel_postgres_data
 
+# ==============================================================================
+# Isolated Internal Network
+# ==============================================================================
 networks:
   sentinel-network:
     name: cloudops_sentinel_net
     driver: bridge
-
