@@ -49,7 +49,7 @@ export default function ReportIncidentModal({ isOpen, onClose, onSuccess, initia
     try {
       setLoadingApps(true);
       const res = await api.applications.list({ page_size: 100 });
-      setApplications(res.data?.items || []);
+      setApplications(res?.items || res?.data?.items || []);
     } catch {
       // Non-blocking fallback
     } finally {
@@ -195,3 +195,4 @@ export default function ReportIncidentModal({ isOpen, onClose, onSuccess, initia
     </Modal>
   );
 }
+

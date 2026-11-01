@@ -36,20 +36,24 @@ export default function SettingsPage() {
 
       const durationMs = Math.round(performance.now() - start);
 
-      const livenessSuccess = livenessRes.status === 'fulfilled' && livenessRes.value.status === 200;
-      const readinessSuccess = readinessRes.status === 'fulfilled' && readinessRes.value.status === 200;
+      const livenessSuccess =
+        livenessRes.status === 'fulfilled' &&
+        (livenessRes.value?.status === 'healthy' || livenessRes.value?.status === 200);
+      const readinessSuccess =
+        readinessRes.status === 'fulfilled' &&
+        (readinessRes.value?.status === 'ready' || readinessRes.value?.database === 'connected');
 
       setConnectionResult({
         timestamp: new Date().toLocaleTimeString(),
         durationMs,
         liveness: {
           success: livenessSuccess,
-          data: livenessRes.status === 'fulfilled' ? livenessRes.value.data : null,
+          data: livenessRes.status === 'fulfilled' ? (livenessRes.value?.data || livenessRes.value) : null,
           error: livenessRes.status === 'rejected' ? livenessRes.reason.message : null,
         },
         readiness: {
           success: readinessSuccess,
-          data: readinessRes.status === 'fulfilled' ? readinessRes.value.data : null,
+          data: readinessRes.status === 'fulfilled' ? (readinessRes.value?.data || readinessRes.value) : null,
           error: readinessRes.status === 'rejected' ? readinessRes.reason.message : null,
         },
       });
@@ -253,3 +257,4 @@ export default function SettingsPage() {
     </AppShell>
   );
 }
+

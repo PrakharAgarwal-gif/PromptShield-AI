@@ -57,8 +57,8 @@ export default function TriggerRecoveryModal({
         api.applications.list({ page_size: 100 }),
         api.incidents.list({ status: 'open', page_size: 50 }),
       ]);
-      setApplications(appsRes.data?.items || []);
-      setIncidents(incsRes.data?.items || []);
+      setApplications(appsRes?.items || appsRes?.data?.items || []);
+      setIncidents(incsRes?.items || incsRes?.data?.items || []);
     } catch {
       // Non-blocking fallback
     } finally {
@@ -180,3 +180,4 @@ export default function TriggerRecoveryModal({
     </Modal>
   );
 }
+

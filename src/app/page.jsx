@@ -55,10 +55,10 @@ export default function OverviewPage() {
       ]);
 
       const summary = summaryRes.status === 'fulfilled' ? summaryRes.value : null;
-      const apps = appsRes.status === 'fulfilled' ? appsRes.value : { items: [], total: 0 };
-      const deps = depRes.status === 'fulfilled' ? depRes.value : { items: [], total: 0 };
-      const incs = incRes.status === 'fulfilled' ? incRes.value : { items: [], total: 0 };
-      const recs = recRes.status === 'fulfilled' ? recRes.value : { items: [], total: 0 };
+      const apps = appsRes.status === 'fulfilled' ? (appsRes.value?.items ? appsRes.value : appsRes.value?.data || { items: [], total: 0 }) : { items: [], total: 0 };
+      const deps = depRes.status === 'fulfilled' ? (depRes.value?.items ? depRes.value : depRes.value?.data || { items: [], total: 0 }) : { items: [], total: 0 };
+      const incs = incRes.status === 'fulfilled' ? (incRes.value?.items ? incRes.value : incRes.value?.data || { items: [], total: 0 }) : { items: [], total: 0 };
+      const recs = recRes.status === 'fulfilled' ? (recRes.value?.items ? recRes.value : recRes.value?.data || { items: [], total: 0 }) : { items: [], total: 0 };
 
       // Compute statistics
       const totalApps = apps.total || 0;

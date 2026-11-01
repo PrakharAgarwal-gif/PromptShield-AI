@@ -57,10 +57,10 @@ export default function RecoveryPage() {
       if (initialIncidentId) params.incident_id = initialIncidentId;
 
       const res = await api.recovery.list(params);
-      const items = res.data?.items || [];
+      const items = res?.items || res?.data?.items || [];
       setActions(items);
-      setTotalPages(res.data?.total_pages || 1);
-      setTotalCount(res.data?.total || 0);
+      setTotalPages(res?.total_pages || res?.data?.total_pages || 1);
+      setTotalCount(res?.total || res?.data?.total || 0);
     } catch (err) {
       setError(err.message || 'Failed to fetch recovery audit history');
     } finally {
@@ -275,3 +275,4 @@ export default function RecoveryPage() {
     </AppShell>
   );
 }
+
