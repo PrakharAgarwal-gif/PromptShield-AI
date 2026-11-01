@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  # ==============================================================================
+  # Primary PostgreSQL Database
+  # ==============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: cloudops-sentinel-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cloudops_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudops_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-cloudops_sentinel}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cloudops_user} -d ${POSTGRES_DB:-cloudops_sentinel}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - sentinel-network
+
+  # ==============================================================================
+  # CloudOps Sentinel Backend API
+  # ==============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudops-sentinel-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-false}
+      APP_NAME: cloudops-sentinel-api
+      APP_VERSION: 0.1.0
+      HOST: 0.0.0.0
+      PORT: 8000
+      CORS_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000"]'
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-cloudops_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudops_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-cloudops_sentinel}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-cloudops_user}:${POSTGRES_PASSWORD:-cloudops_secure_password}@postgres:5432/${POSTGRES_DB:-cloudops_sentinel}
+      LOG_LEVEL: INFO
+      RECOVERY_DRY_RUN_MODE: "true"
+      ENABLE_METRIC_SIMULATOR: "false"
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sentinel-network
+
+volumes:
+  postgres_data:
+    name: cloudops_sentinel_postgres_data
+
+networks:
+  sentinel-network:
+    name: cloudops_sentinel_net
+    driver: bridge
+
