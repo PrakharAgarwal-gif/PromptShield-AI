@@ -42,3 +42,14 @@ htmlcov/
 *.sqlite3
 *.db
 
+# Node.js / Next.js Frontend
+node_modules/
+.next/
+out/
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
