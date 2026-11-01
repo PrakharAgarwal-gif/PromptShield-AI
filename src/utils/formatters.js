@@ -2,6 +2,8 @@
  * Formatting helpers for timestamps, hashes, numbers, and badge styles.
  */
 
+export const formatDate = formatDateTime;
+
 export function formatDateTime(isoString) {
   if (!isoString) return '—';
   try {

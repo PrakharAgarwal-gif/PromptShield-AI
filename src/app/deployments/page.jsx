@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { GitBranch, Plus, CheckCircle2, Clock, Filter } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -14,7 +14,7 @@ import CreateDeploymentModal from '@/components/deployments/CreateDeploymentModa
 import { formatDateTime, formatRelativeTime, formatCommitHash } from '@/utils/formatters';
 import { ENVIRONMENTS } from '@/utils/constants';
 
-export default function DeploymentsPage() {
+function DeploymentsContent() {
   const searchParams = useSearchParams();
   const initialAppId = searchParams.get('application_id') || '';
 
@@ -284,6 +284,20 @@ export default function DeploymentsPage() {
         preselectedAppId={applicationId}
       />
     </div>
+  );
+}
+
+export default function DeploymentsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 flex justify-center">
+          <LoadingSpinner text="Loading deployments telemetry..." size="lg" />
+        </div>
+      }
+    >
+      <DeploymentsContent />
+    </Suspense>
   );
 }
 

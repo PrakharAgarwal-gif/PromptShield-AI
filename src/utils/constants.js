@@ -2,6 +2,10 @@
  * Global application constants and badge mapping definitions.
  */
 
+export const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+).replace(/\/$/, '');
+
 export const APP_CONFIG = {
   name: 'CloudOps Sentinel',
   version: '0.1.0',
@@ -38,6 +42,21 @@ export const INCIDENT_STATUS = {
   RESOLVED: 'resolved',
   CLOSED: 'closed',
 };
+
+export const INCIDENT_SEVERITY_OPTIONS = [
+  { value: 'critical', label: 'Critical' },
+  { value: 'high', label: 'High' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'low', label: 'Low' },
+];
+
+export const INCIDENT_STATUS_OPTIONS = [
+  { value: 'open', label: 'Open' },
+  { value: 'investigating', label: 'Investigating' },
+  { value: 'mitigated', label: 'Mitigated' },
+  { value: 'resolved', label: 'Resolved' },
+  { value: 'closed', label: 'Closed' },
+];
 
 export const RECOVERY_ACTION_TYPES = [
   { value: 'restart_service', label: 'Restart Service', description: 'Safely restart the application service layer' },

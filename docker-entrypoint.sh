@@ -36,3 +36,4 @@ alembic upgrade head || {
 
 echo "[CLOUDOPS SENTINEL] Handing over process to command: $@"
 exec "$@"
+

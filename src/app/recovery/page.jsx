@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   ShieldCheck,
@@ -25,7 +25,7 @@ import api from '@/lib/api';
 import { formatDate, formatRelativeTime } from '@/utils/formatters';
 import { RECOVERY_ACTION_TYPES } from '@/utils/constants';
 
-export default function RecoveryPage() {
+function RecoveryContent() {
   const searchParams = useSearchParams();
   const initialIncidentId = searchParams.get('incident_id') || '';
 
@@ -273,6 +273,20 @@ export default function RecoveryPage() {
         initialIncidentId={initialIncidentId}
       />
     </AppShell>
+  );
+}
+
+export default function RecoveryPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 flex justify-center">
+          <LoadingSpinner text="Loading recovery telemetry audit trail..." size="lg" />
+        </div>
+      }
+    >
+      <RecoveryContent />
+    </Suspense>
   );
 }
 
