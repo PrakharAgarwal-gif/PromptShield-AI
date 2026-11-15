@@ -6,7 +6,7 @@ import { ShieldCheck, Info } from 'lucide-react';
 import Modal from '@/components/common/Modal';
 import Button from '@/components/common/Button';
 import ErrorAlert from '@/components/common/ErrorAlert';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 import { RECOVERY_ACTION_TYPES } from '@/utils/constants';
 
 export default function TriggerRecoveryModal({
@@ -35,8 +35,6 @@ export default function TriggerRecoveryModal({
       action_type: 'restart_service',
     },
   });
-
-  const selectedAppId = watch('application_id');
 
   useEffect(() => {
     if (isOpen) {
@@ -70,114 +68,97 @@ export default function TriggerRecoveryModal({
     try {
       setSubmitting(true);
       setSubmitError(null);
-
-      const payload = {
-        application_id: formData.application_id,
-        action_type: formData.action_type,
-        incident_id: formData.incident_id?.trim() || null,
-      };
-
-      await api.recovery.trigger(payload);
+      await api.recovery.trigger(formData);
       onSuccess?.();
       onClose();
     } catch (err) {
-      setSubmitError(err.message || 'Failed to trigger recovery action');
+      setSubmitError(err.message || 'Failed to trigger recovery routine');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Filter incidents matching selected application if selected
-  const availableIncidents = selectedAppId
-    ? incidents.filter((i) => i.application_id === selectedAppId)
-    : incidents;
-
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Stage Self-Healing Recovery"
-      description="Execute a safe simulated remediation action against target infrastructure."
-      size="lg"
+      title="Stage Self-Healing Recovery Routine"
+      subtitle="Execute an isolated dry-run automated recovery action to mitigate service anomalies"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {submitError && <ErrorAlert message={submitError} onDismiss={() => setSubmitError(null)} />}
 
+        {/* Safety Dry-run Notice */}
+        <div className="p-3.5 rounded-xl glass-surface border border-aurora-cyan/30 text-xs text-text-secondary flex items-start gap-3">
+          <Info className="w-4 h-4 text-aurora-cyan shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong className="text-white">Containment Policy:</strong> Recovery procedures run in{' '}
+            <span className="text-aurora-cyan font-mono font-bold">DRY-RUN SIMULATION</span> mode. The Sentinel engine evaluates pre-flight conditions and generates audit logs without mutating production hardware.
+          </p>
+        </div>
+
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-            Target Application <span className="text-rose-400">*</span>
+          <label className="block text-xs font-mono font-medium text-text-secondary uppercase mb-1.5">
+            Target Microservice <span className="text-aurora-coral">*</span>
           </label>
           <select
             {...register('application_id', { required: 'Please select an application' })}
-            disabled={loadingData}
-            className="w-full rounded-lg border border-slate-700 bg-slate-900/90 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border rounded-xl text-white focus:outline-none focus:border-aurora-cyan font-mono"
           >
-            <option value="">{loadingData ? 'Loading applications...' : 'Select an application...'}</option>
+            <option value="" className="bg-space-midnight text-white">Select a registered microservice...</option>
             {applications.map((app) => (
-              <option key={app.id} value={app.id}>
+              <option key={app.id} value={app.id} className="bg-space-midnight text-white">
                 {app.name} ({app.environment})
               </option>
             ))}
           </select>
           {errors.application_id && (
-            <p className="mt-1 text-xs text-rose-400">{errors.application_id.message}</p>
+            <p className="mt-1.5 text-xs text-aurora-coral font-mono">{errors.application_id.message}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-            Remediation Action Type <span className="text-rose-400">*</span>
+          <label className="block text-xs font-mono font-medium text-text-secondary uppercase mb-1.5">
+            Recovery Action Routine <span className="text-aurora-coral">*</span>
           </label>
           <select
             {...register('action_type', { required: 'Action type is required' })}
-            className="w-full rounded-lg border border-slate-700 bg-slate-900/90 px-3.5 py-2.5 text-sm text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border rounded-xl text-white focus:outline-none focus:border-aurora-cyan font-mono"
           >
             {RECOVERY_ACTION_TYPES.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.label} — {type.description}
+              <option key={type.value} value={type.value} className="bg-space-midnight text-white">
+                {type.label}
               </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-            Linked Incident (Optional)
+          <label className="block text-xs font-mono font-medium text-text-secondary uppercase mb-1.5">
+            Associate Open Incident (Optional)
           </label>
           <select
             {...register('incident_id')}
-            disabled={loadingData}
-            className="w-full rounded-lg border border-slate-700 bg-slate-900/90 px-3.5 py-2.5 text-sm text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border rounded-xl text-white focus:outline-none focus:border-aurora-cyan font-mono"
           >
-            <option value="">No linked incident (standalone manual remediation)</option>
-            {availableIncidents.map((inc) => (
-              <option key={inc.id} value={inc.id}>
+            <option value="" className="bg-space-midnight text-white">None (Standalone maintenance routine)</option>
+            {incidents.map((inc) => (
+              <option key={inc.id} value={inc.id} className="bg-space-midnight text-white">
                 [{inc.severity?.toUpperCase()}] {inc.title}
               </option>
             ))}
           </select>
         </div>
 
-        <div className="rounded-lg border border-blue-900/40 bg-blue-950/20 p-3.5 flex items-start gap-3">
-          <ShieldCheck className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-          <div className="text-xs text-blue-200/90 space-y-1">
-            <p className="font-semibold text-blue-300">Safe Simulation / Dry-Run Mode Active</p>
-            <p className="text-slate-400 leading-relaxed">
-              CloudOps Sentinel safeguards production infrastructure by evaluating policies and recording dry-run audit logs. Live infrastructure restart commands require confirmed cloud provider integration tokens.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-          <Button variant="ghost" onClick={onClose} disabled={submitting} type="button">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-border">
+          <Button variant="secondary" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
-          <Button variant="primary" loading={submitting} type="submit" icon={ShieldCheck}>
-            Trigger Remediation
+          <Button type="submit" variant="primary" isLoading={submitting}>
+            Stage Recovery Execution
           </Button>
         </div>
       </form>
     </Modal>
   );
 }
-

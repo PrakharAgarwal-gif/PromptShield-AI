@@ -5,7 +5,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 import Button from './Button';
 
 export default function ErrorAlert({
-  title = 'Failed to load data',
+  title = 'Sentinel API Connection Notice',
   message,
   errors,
   onRetry,
@@ -13,34 +13,35 @@ export default function ErrorAlert({
 }) {
   return (
     <div
-      className={`p-4 rounded-xl border border-rose-500/20 bg-rose-950/20 text-rose-200 text-xs sm:text-sm ${className}`}
+      className={`p-5 rounded-2xl border border-aurora-coral/30 bg-aurora-coral/10 text-white text-xs sm:text-sm backdrop-blur-md shadow-glow-coral ${className}`}
     >
-      <div className="flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3.5">
+        <div className="w-9 h-9 rounded-xl bg-aurora-coral/20 flex items-center justify-center shrink-0 border border-aurora-coral/40">
+          <AlertTriangle className="w-5 h-5 text-aurora-coral" />
+        </div>
         <div className="flex-1">
-          <h4 className="font-semibold text-rose-300">{title}</h4>
-          <p className="mt-1 text-xs text-rose-300/80 leading-relaxed">
-            {message || 'An unexpected error occurred while communicating with the backend.'}
+          <h4 className="font-bold text-white text-sm sm:text-base tracking-tight">{title}</h4>
+          <p className="mt-1 text-xs text-text-secondary leading-relaxed">
+            {message || 'An unexpected condition occurred while communicating with the Sentinel backend.'}
           </p>
 
           {errors && Array.isArray(errors) && errors.length > 0 && (
-            <ul className="mt-2 space-y-1 text-xs bg-black/30 p-2.5 rounded border border-rose-900/40">
+            <ul className="mt-3 space-y-1 text-xs bg-space-midnight/80 p-3 rounded-xl border border-aurora-coral/20 font-mono">
               {errors.map((err, idx) => (
-                <li key={idx} className="font-mono text-[11px] text-rose-300">
-                  <span className="text-slate-400">{err.field}:</span> {err.message}
+                <li key={idx} className="text-[11px] text-aurora-coral">
+                  <span className="text-text-muted">{err.field}:</span> {err.message}
                 </li>
               ))}
             </ul>
           )}
 
           {onRetry && (
-            <div className="mt-3">
+            <div className="mt-4">
               <Button
                 variant="danger"
                 size="sm"
                 icon={RefreshCw}
                 onClick={onRetry}
-                className="bg-rose-700/80 hover:bg-rose-600 text-xs"
               >
                 Retry Request
               </Button>
@@ -51,4 +52,3 @@ export default function ErrorAlert({
     </div>
   );
 }
-

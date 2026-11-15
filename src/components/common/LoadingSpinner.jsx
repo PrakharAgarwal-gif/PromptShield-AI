@@ -4,37 +4,43 @@ import React from 'react';
 import { Loader2 } from 'lucide-react';
 
 export default function LoadingSpinner({
-  label = 'Loading telemetry data...',
+  label = 'Streaming Sentinel telemetry...',
   className = '',
   size = 'md',
 }) {
   const sizeMap = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-10 h-10',
+    sm: 'w-5 h-5',
+    md: 'w-8 h-8',
+    lg: 'w-12 h-12',
   };
 
   return (
     <div
-      className={`flex flex-col items-center justify-center p-8 sm:p-12 text-center text-slate-400 gap-3 ${className}`}
+      className={`flex flex-col items-center justify-center p-8 sm:p-14 text-center text-text-secondary gap-3.5 ${className}`}
     >
-      <Loader2 className={`${sizeMap[size] || sizeMap.md} animate-spin text-sentinel-500`} />
-      {label && <p className="text-xs font-medium text-slate-400 tracking-wide">{label}</p>}
+      <div className="relative flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full bg-aurora-cyan/20 blur-md animate-pulse"></div>
+        <Loader2 className={`${sizeMap[size] || sizeMap.md} animate-spin text-aurora-cyan relative`} />
+      </div>
+      {label && (
+        <p className="text-xs font-mono font-medium text-text-secondary tracking-wider uppercase">
+          {label}
+        </p>
+      )}
     </div>
   );
 }
 
 export function SkeletonRow({ cols = 4 }) {
   return (
-    <div className="flex items-center gap-4 py-3 animate-pulse">
+    <div className="flex items-center gap-4 py-3.5 animate-pulse">
       {Array.from({ length: cols }).map((_, i) => (
         <div
           key={i}
-          className="h-4 bg-surface-elevated rounded"
+          className="h-4 bg-surface-elevated/80 rounded-lg border border-surface-border/50"
           style={{ width: `${Math.floor(100 / cols)}%` }}
         />
       ))}
     </div>
   );
 }
-

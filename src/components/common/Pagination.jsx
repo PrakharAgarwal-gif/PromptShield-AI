@@ -19,18 +19,18 @@ export default function Pagination({
 
   return (
     <div
-      className={`flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-surface-border text-xs text-slate-400 ${className}`}
+      className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 border-t border-surface-border text-xs text-text-secondary font-mono ${className}`}
     >
       <div>
-        Showing <span className="font-semibold text-slate-200">{startItem}</span> to{' '}
-        <span className="font-semibold text-slate-200">{endItem}</span> of{' '}
-        <span className="font-semibold text-slate-200">{total}</span> records
+        Showing <span className="font-semibold text-aurora-cyan">{startItem}</span> to{' '}
+        <span className="font-semibold text-aurora-cyan">{endItem}</span> of{' '}
+        <span className="font-semibold text-white">{total}</span> records
       </div>
 
       <div className="flex items-center gap-2">
         <span className="mr-2">
-          Page <span className="font-semibold text-slate-200">{page}</span> of{' '}
-          <span className="font-semibold text-slate-200">{Math.max(totalPages, 1)}</span>
+          Page <span className="font-semibold text-white">{page}</span> of{' '}
+          <span className="font-semibold text-white">{Math.max(totalPages, 1)}</span>
         </span>
         <Button
           variant="secondary"
@@ -54,4 +54,3 @@ export default function Pagination({
     </div>
   );
 }
-

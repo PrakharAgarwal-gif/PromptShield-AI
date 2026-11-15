@@ -27,10 +27,14 @@ export default function ApplicationModal({
   isOpen,
   onClose,
   onSubmit,
+  onSave,
   application = null,
+  editingApp = null,
   isSubmitting = false,
 }) {
-  const isEdit = Boolean(application);
+  const currentApp = editingApp || application;
+  const isEdit = Boolean(currentApp);
+  const submitHandler = onSave || onSubmit;
 
   const {
     register,
@@ -49,13 +53,13 @@ export default function ApplicationModal({
   });
 
   useEffect(() => {
-    if (application) {
+    if (currentApp) {
       reset({
-        name: application.name || '',
-        description: application.description || '',
-        repository_url: application.repository_url || '',
-        environment: application.environment || 'production',
-        status: application.status || 'healthy',
+        name: currentApp.name || '',
+        description: currentApp.description || '',
+        repository_url: currentApp.repository_url || '',
+        environment: currentApp.environment || 'production',
+        status: currentApp.status || 'healthy',
       });
     } else {
       reset({
@@ -66,119 +70,124 @@ export default function ApplicationModal({
         status: 'healthy',
       });
     }
-  }, [application, reset, isOpen]);
+  }, [currentApp, reset, isOpen]);
+
+  const handleFormSubmit = (data) => {
+    if (submitHandler) {
+      submitHandler(data);
+    }
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? 'Edit Application Service' : 'Register Application Service'}
+      title={isEdit ? 'Edit Microservice' : 'Register Microservice'}
       subtitle={
         isEdit
-          ? `Modify settings for service '${application?.name}'`
-          : 'Add a new microservice or cloud target to the CloudOps Sentinel monitoring plane'
+          ? `Modify settings for service '${currentApp?.name}'`
+          : 'Add a new microservice target to the CloudOps Sentinel monitoring plane'
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
         {/* Name */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">
-            Service Name <span className="text-rose-400">*</span>
+          <label className="block text-xs font-mono font-medium text-text-secondary uppercase mb-1.5">
+            Service Name <span className="text-aurora-coral">*</span>
           </label>
           <input
             type="text"
-            placeholder="e.g. payment-service"
+            placeholder="e.g. auth-gateway-service"
             {...register('name')}
-            className="w-full px-3 py-2 text-xs sm:text-sm bg-surface-muted border border-surface-border rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-sentinel-500 font-mono"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border rounded-xl text-white focus:outline-none focus:border-aurora-cyan font-mono"
           />
           {errors.name && (
-            <p className="mt-1 text-xs text-rose-400">{errors.name.message}</p>
+            <p className="mt-1.5 text-xs text-aurora-coral font-mono">{errors.name.message}</p>
           )}
         </div>
 
         {/* Environment & Status */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
-              Environment <span className="text-rose-400">*</span>
+            <label className="block text-xs font-mono font-medium text-text-secondary uppercase mb-1.5">
+              Environment <span className="text-aurora-coral">*</span>
             </label>
             <select
               {...register('environment')}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-surface-muted border border-surface-border rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-sentinel-500"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border rounded-xl text-white focus:outline-none focus:border-aurora-cyan font-mono"
             >
               {ENVIRONMENTS.map((env) => (
-                <option key={env.value} value={env.value}>
+                <option key={env.value} value={env.value} className="bg-space-midnight text-white">
                   {env.label}
                 </option>
               ))}
             </select>
             {errors.environment && (
-              <p className="mt-1 text-xs text-rose-400">{errors.environment.message}</p>
+              <p className="mt-1.5 text-xs text-aurora-coral font-mono">{errors.environment.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
-              Initial Status <span className="text-rose-400">*</span>
+            <label className="block text-xs font-mono font-medium text-text-secondary uppercase mb-1.5">
+              Initial Health Status <span className="text-aurora-coral">*</span>
             </label>
             <select
               {...register('status')}
-              className="w-full px-3 py-2 text-xs sm:text-sm bg-surface-muted border border-surface-border rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-sentinel-500"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border rounded-xl text-white focus:outline-none focus:border-aurora-cyan font-mono"
             >
-              <option value={APPLICATION_STATUS.HEALTHY}>Healthy</option>
-              <option value={APPLICATION_STATUS.DEGRADED}>Degraded</option>
-              <option value={APPLICATION_STATUS.DOWN}>Down / Offline</option>
-              <option value={APPLICATION_STATUS.MAINTENANCE}>Maintenance</option>
+              <option value={APPLICATION_STATUS.HEALTHY} className="bg-space-midnight text-aurora-mint">Healthy</option>
+              <option value={APPLICATION_STATUS.DEGRADED} className="bg-space-midnight text-aurora-amber">Degraded</option>
+              <option value={APPLICATION_STATUS.DOWN} className="bg-space-midnight text-aurora-coral">Down / Offline</option>
+              <option value={APPLICATION_STATUS.MAINTENANCE} className="bg-space-midnight text-aurora-purple">Maintenance</option>
             </select>
             {errors.status && (
-              <p className="mt-1 text-xs text-rose-400">{errors.status.message}</p>
+              <p className="mt-1.5 text-xs text-aurora-coral font-mono">{errors.status.message}</p>
             )}
           </div>
         </div>
 
         {/* Git Repository URL */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">
-            Repository URL (Optional)
+          <label className="block text-xs font-mono font-medium text-text-secondary uppercase mb-1.5">
+            Git Repository URL (Optional)
           </label>
           <input
             type="url"
-            placeholder="https://github.com/org/repo"
+            placeholder="https://github.com/organization/microservice-repo"
             {...register('repository_url')}
-            className="w-full px-3 py-2 text-xs sm:text-sm bg-surface-muted border border-surface-border rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-sentinel-500"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border rounded-xl text-white focus:outline-none focus:border-aurora-cyan font-mono"
           />
           {errors.repository_url && (
-            <p className="mt-1 text-xs text-rose-400">{errors.repository_url.message}</p>
+            <p className="mt-1.5 text-xs text-aurora-coral font-mono">{errors.repository_url.message}</p>
           )}
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">
-            Architectural Description
+          <label className="block text-xs font-mono font-medium text-text-secondary uppercase mb-1.5">
+            Architectural Overview
           </label>
           <textarea
             rows={3}
-            placeholder="Brief overview of service responsibilities, dependencies and SLA expectations..."
+            placeholder="Brief overview of service boundaries, dependencies and SLA requirements..."
             {...register('description')}
-            className="w-full px-3 py-2 text-xs sm:text-sm bg-surface-muted border border-surface-border rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-sentinel-500"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border rounded-xl text-white focus:outline-none focus:border-aurora-cyan font-sans"
           />
           {errors.description && (
-            <p className="mt-1 text-xs text-rose-400">{errors.description.message}</p>
+            <p className="mt-1.5 text-xs text-aurora-coral font-mono">{errors.description.message}</p>
           )}
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-border">
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-border">
+          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type="submit" isLoading={isSubmitting}>
-            {isEdit ? 'Save Changes' : 'Create Application'}
+          <Button type="submit" variant="primary" isLoading={isSubmitting}>
+            {isEdit ? 'Save Changes' : 'Register Microservice'}
           </Button>
         </div>
       </form>
     </Modal>
   );
 }
-

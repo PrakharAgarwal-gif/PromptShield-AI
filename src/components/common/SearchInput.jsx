@@ -27,13 +27,13 @@ export default function SearchInput({
 
   return (
     <div className={`relative flex items-center ${className}`}>
-      <Search className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
+      <Search className="absolute left-3.5 w-4 h-4 text-text-muted pointer-events-none" />
       <input
         type="text"
         value={internalValue}
         onChange={(e) => setInternalValue(e.target.value)}
         placeholder={placeholder}
-        className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-surface-muted border border-surface-border focus:border-sentinel-500 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sentinel-500 transition-colors"
+        className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm glass-surface border border-surface-border focus:border-aurora-cyan rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-aurora-cyan/30 transition-all font-sans"
       />
       {internalValue && (
         <button
@@ -42,7 +42,7 @@ export default function SearchInput({
             setInternalValue('');
             onChange('');
           }}
-          className="absolute right-2.5 p-0.5 text-slate-400 hover:text-white rounded"
+          className="absolute right-3 p-1 text-text-muted hover:text-white rounded-lg transition-colors"
         >
           <X className="w-3.5 h-3.5" />
         </button>
@@ -50,4 +50,3 @@ export default function SearchInput({
     </div>
   );
 }
-

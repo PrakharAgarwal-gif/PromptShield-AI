@@ -1,5 +1,6 @@
 /**
  * Formatting helpers for timestamps, hashes, numbers, and badge styles.
+ * Aurora Neon design tokens integrated.
  */
 
 export const formatDate = formatDateTime;
@@ -56,16 +57,16 @@ export function getStatusBadgeConfig(status) {
     case 'closed':
     case 'ready':
       return {
-        bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-        dot: 'bg-emerald-400',
+        bg: 'bg-aurora-mint/15 text-aurora-mint border-aurora-mint/30 shadow-sm',
+        dot: 'bg-aurora-mint shadow-glow-mint',
         label: normalized.toUpperCase(),
       };
     case 'degraded':
     case 'investigating':
     case 'mitigated':
       return {
-        bg: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-        dot: 'bg-amber-400',
+        bg: 'bg-aurora-amber/15 text-aurora-amber border-aurora-amber/30 shadow-sm',
+        dot: 'bg-aurora-amber shadow-glow-amber',
         label: normalized.toUpperCase(),
       };
     case 'down':
@@ -74,35 +75,34 @@ export function getStatusBadgeConfig(status) {
     case 'open':
     case 'unhealthy':
       return {
-        bg: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-        dot: 'bg-rose-400',
+        bg: 'bg-aurora-coral/15 text-aurora-coral border-aurora-coral/30 shadow-sm',
+        dot: 'bg-aurora-coral shadow-glow-coral',
         label: normalized.toUpperCase(),
       };
     case 'simulated':
       return {
-        bg: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-        dot: 'bg-blue-400',
+        bg: 'bg-aurora-cyan/15 text-aurora-cyan border-aurora-cyan/30 shadow-sm',
+        dot: 'bg-aurora-cyan shadow-glow-cyan',
         label: 'SIMULATED (DRY RUN)',
       };
     case 'pending':
     case 'in_progress':
       return {
-        bg: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
-        dot: 'bg-sky-400 animate-pulse',
+        bg: 'bg-aurora-lavender/15 text-aurora-lavender border-aurora-lavender/30 shadow-sm',
+        dot: 'bg-aurora-lavender animate-pulse',
         label: normalized.replace('_', ' ').toUpperCase(),
       };
     case 'maintenance':
       return {
-        bg: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-        dot: 'bg-purple-400',
+        bg: 'bg-aurora-purple/15 text-aurora-purple border-aurora-purple/30 shadow-sm',
+        dot: 'bg-aurora-purple shadow-glow-purple',
         label: 'MAINTENANCE',
       };
     default:
       return {
-        bg: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-        dot: 'bg-slate-400',
+        bg: 'bg-surface-elevated text-text-secondary border-surface-border',
+        dot: 'bg-text-muted',
         label: normalized.toUpperCase() || 'UNKNOWN',
       };
   }
 }
-

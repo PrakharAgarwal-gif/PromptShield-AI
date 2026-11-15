@@ -10,6 +10,9 @@ import {
   Filter,
   CheckCircle2,
   AlertTriangle,
+  GitBranch,
+  Shield,
+  Layers,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import Badge from '@/components/common/Badge';
@@ -80,10 +83,10 @@ export default function ApplicationsPage() {
       setIsSubmitting(true);
       if (editingApp) {
         await api.applications.update(editingApp.id, formData);
-        setNotice(`Application '${formData.name}' successfully updated.`);
+        setNotice(`Microservice '${formData.name}' successfully updated.`);
       } else {
         await api.applications.create(formData);
-        setNotice(`Application '${formData.name}' successfully registered.`);
+        setNotice(`Microservice '${formData.name}' successfully registered.`);
       }
       setIsCreateOpen(false);
       setEditingApp(null);
@@ -101,7 +104,7 @@ export default function ApplicationsPage() {
     try {
       setIsSubmitting(true);
       await api.applications.delete(deletingApp.id);
-      setNotice(`Application '${deletingApp.name}' has been deleted.`);
+      setNotice(`Microservice '${deletingApp.name}' has been deregistered.`);
       setDeletingApp(null);
       setSelectedApp(null);
       fetchApplications();
@@ -113,15 +116,20 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7 pb-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            Monitored Applications
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Registered microservices, environments, deployment health and upstream Git sources
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Microservice Fleet
+            </h2>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-aurora-cyan/15 text-aurora-cyan border border-aurora-cyan/30">
+              {total} ACTIVE SERVICES
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
+            Registered microservices, environment topologies, container health and upstream Git repositories.
           </p>
         </div>
 
@@ -131,6 +139,8 @@ export default function ApplicationsPage() {
             setIsCreateOpen(true);
           }}
           icon={Plus}
+          variant="primary"
+          size="md"
         >
           Register Service
         </Button>
@@ -138,14 +148,14 @@ export default function ApplicationsPage() {
 
       {/* Success Notification Banner */}
       {notice && (
-        <div className="flex items-center justify-between p-3.5 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-emerald-200 text-xs">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>{notice}</span>
+        <div className="flex items-center justify-between p-4 rounded-xl glass-surface border border-aurora-mint/40 text-aurora-mint text-xs shadow-glow-mint">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 text-aurora-mint" />
+            <span className="font-medium text-white">{notice}</span>
           </div>
           <button
             onClick={() => setNotice(null)}
-            className="text-emerald-400 hover:text-white font-medium"
+            className="text-aurora-mint hover:text-white font-mono font-bold uppercase text-[11px]"
           >
             Dismiss
           </button>
@@ -156,32 +166,32 @@ export default function ApplicationsPage() {
       {error && <ErrorAlert message={error} onRetry={fetchApplications} />}
 
       {/* Search and Filters Bar */}
-      <div className="p-4 rounded-xl bg-surface border border-surface-border flex flex-col md:flex-row items-center justify-between gap-3 shadow-subtle">
+      <div className="p-4 sm:p-5 rounded-2xl glass-surface-elevated border border-surface-border flex flex-col md:flex-row items-center justify-between gap-4 shadow-glass">
         <SearchInput
           value={search}
           onChange={(val) => {
             setSearch(val);
             setPage(1);
           }}
-          placeholder="Filter by service name or notes..."
-          className="w-full md:w-80"
+          placeholder="Search by microservice name, repo, or description..."
+          className="w-full md:w-96"
         />
 
-        <div className="flex items-center gap-2.5 w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           {/* Environment Filter */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <Filter className="w-3.5 h-3.5 text-slate-500" />
+          <div className="flex items-center gap-2 text-xs">
+            <Filter className="w-3.5 h-3.5 text-aurora-lavender" />
             <select
               value={environment}
               onChange={(e) => {
                 setEnvironment(e.target.value);
                 setPage(1);
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-surface-muted border border-surface-border text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-sentinel-500"
+              className="px-3 py-2 rounded-xl glass-surface border border-surface-border text-text-primary text-xs focus:outline-none focus:border-aurora-cyan font-mono"
             >
-              <option value="">All Environments</option>
+              <option value="" className="bg-space-midnight text-white">All Environments</option>
               {ENVIRONMENTS.map((env) => (
-                <option key={env.value} value={env.value}>
+                <option key={env.value} value={env.value} className="bg-space-midnight text-white">
                   {env.label}
                 </option>
               ))}
@@ -195,27 +205,27 @@ export default function ApplicationsPage() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="px-2.5 py-1.5 rounded-lg bg-surface-muted border border-surface-border text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-sentinel-500"
+            className="px-3 py-2 rounded-xl glass-surface border border-surface-border text-text-primary text-xs focus:outline-none focus:border-aurora-cyan font-mono"
           >
-            <option value="">All Health States</option>
-            <option value="healthy">Healthy</option>
-            <option value="degraded">Degraded</option>
-            <option value="down">Down</option>
-            <option value="maintenance">Maintenance</option>
+            <option value="" className="bg-space-midnight text-white">All Health States</option>
+            <option value="healthy" className="bg-space-midnight text-aurora-mint">Healthy</option>
+            <option value="degraded" className="bg-space-midnight text-aurora-amber">Degraded</option>
+            <option value="down" className="bg-space-midnight text-aurora-coral">Down</option>
+            <option value="maintenance" className="bg-space-midnight text-aurora-purple">Maintenance</option>
           </select>
         </div>
       </div>
 
-      {/* Applications Data Table */}
-      <div className="rounded-xl border border-surface-border bg-surface shadow-subtle overflow-hidden">
+      {/* Applications Data Table in Arctic Glass */}
+      <div className="rounded-2xl border border-surface-border glass-surface-elevated shadow-glass overflow-hidden">
         {loading ? (
-          <LoadingSpinner label="Fetching applications from PostgreSQL..." />
+          <LoadingSpinner label="Fetching registered microservices..." />
         ) : applications.length === 0 ? (
           <EmptyState
-            title="No Applications Found"
+            title="No Microservices Located"
             message={
               search || environment || statusFilter
-                ? 'No registered applications match your selected filter criteria.'
+                ? 'No registered microservices match your selected filter criteria.'
                 : 'Get started by registering your first service to enable automated health monitoring and deployment tracking.'
             }
             icon={Server}
@@ -229,79 +239,88 @@ export default function ApplicationsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-surface-border bg-canvas/40 text-[11px] font-mono uppercase tracking-wider text-slate-400">
-                  <th className="py-3 px-4">Service</th>
-                  <th className="py-3 px-4">Environment</th>
-                  <th className="py-3 px-4">Health State</th>
-                  <th className="py-3 px-4">Repository</th>
-                  <th className="py-3 px-4">Updated</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                <tr className="border-b border-surface-border bg-space/60 text-[11px] font-mono uppercase tracking-wider text-text-muted">
+                  <th className="py-4 px-5">Microservice</th>
+                  <th className="py-4 px-5">Environment</th>
+                  <th className="py-4 px-5">Health State</th>
+                  <th className="py-4 px-5">Repository</th>
+                  <th className="py-4 px-5">Telemetry Audit</th>
+                  <th className="py-4 px-5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-surface-border">
+              <tbody className="divide-y divide-surface-border/50">
                 {applications.map((app) => (
                   <tr
                     key={app.id}
-                    className="hover:bg-surface-muted/50 transition-colors cursor-pointer group"
+                    className="hover:bg-surface-elevated/60 transition-colors cursor-pointer group"
                     onClick={() => setSelectedApp(app)}
                   >
-                    <td className="py-3.5 px-4">
-                      <div className="font-semibold text-white group-hover:text-sentinel-300 transition-colors">
-                        {app.name}
-                      </div>
-                      {app.description && (
-                        <div className="text-[11px] text-slate-400 truncate max-w-xs mt-0.5">
-                          {app.description}
+                    <td className="py-4 px-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-aurora-cyan/15 flex items-center justify-center text-aurora-cyan border border-aurora-cyan/30 shadow-sm shrink-0">
+                          <Server className="w-4 h-4" />
                         </div>
-                      )}
+                        <div>
+                          <div className="font-bold text-white group-hover:text-aurora-cyan transition-colors text-sm">
+                            {app.name}
+                          </div>
+                          {app.description && (
+                            <div className="text-[11px] text-text-secondary truncate max-w-xs mt-0.5 font-sans">
+                              {app.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <span className="font-mono px-2 py-0.5 rounded bg-surface-elevated text-slate-300">
+                    <td className="py-4 px-5">
+                      <span className="font-mono text-[11px] px-2.5 py-1 rounded-md bg-surface-elevated text-aurora-lavender border border-surface-border font-medium">
                         {app.environment}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <Badge status={app.status} />
+                    <td className="py-4 px-5">
+                      <Badge status={app.status} size="md" />
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-[11px]">
+                    <td className="py-4 px-5 font-mono text-[11px]">
                       {app.repository_url ? (
                         <a
                           href={app.repository_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="text-sentinel-400 hover:text-sentinel-300 inline-flex items-center gap-1 truncate max-w-[200px]"
+                          className="text-aurora-cyan hover:text-white inline-flex items-center gap-1.5 truncate max-w-[220px] transition-colors"
                         >
-                          <span className="truncate">{app.repository_url.replace('https://github.com/', '')}</span>
+                          <span className="truncate">
+                            {app.repository_url.replace('https://github.com/', '')}
+                          </span>
                           <ExternalLink className="w-3 h-3 shrink-0" />
                         </a>
                       ) : (
-                        <span className="text-slate-500">—</span>
+                        <span className="text-text-muted">—</span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-400">
+                    <td className="py-4 px-5 text-text-muted font-mono text-[11px]">
                       {formatRelativeTime(app.updated_at)}
                     </td>
-                    <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="py-4 px-5 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => {
                             setEditingApp(app);
                             setIsCreateOpen(true);
                           }}
-                          className="p-1.5 text-slate-400 hover:text-white rounded hover:bg-surface-elevated transition-colors"
+                          className="p-2 text-text-secondary hover:text-white rounded-xl hover:bg-surface-elevated transition-colors border border-transparent hover:border-surface-border"
                           title="Edit Service"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeletingApp(app)}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded hover:bg-surface-elevated transition-colors"
-                          title="Delete Service"
+                          className="p-2 text-text-secondary hover:text-aurora-coral rounded-xl hover:bg-aurora-coral/10 transition-colors border border-transparent hover:border-aurora-coral/30"
+                          title="Deregister Service"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -312,76 +331,83 @@ export default function ApplicationsPage() {
           </div>
         )}
 
-        {/* Pagination Bar */}
-        <div className="p-4 bg-surface">
+        {/* Pagination Controls */}
+        <div className="p-4 border-t border-surface-border bg-space/40">
           <Pagination
             page={page}
             total={total}
             pageSize={pageSize}
             totalPages={totalPages}
-            onPageChange={(p) => setPage(p)}
+            onPageChange={setPage}
           />
         </div>
       </div>
 
-      {/* Create / Edit Modal */}
+      {/* Create / Edit Microservice Modal */}
       <ApplicationModal
         isOpen={isCreateOpen}
         onClose={() => {
           setIsCreateOpen(false);
           setEditingApp(null);
         }}
-        onSubmit={handleSaveApp}
-        application={editingApp}
+        onSave={handleSaveApp}
+        editingApp={editingApp}
         isSubmitting={isSubmitting}
       />
 
-      {/* Detail Modal */}
-      <ApplicationDetailModal
-        isOpen={Boolean(selectedApp)}
-        onClose={() => setSelectedApp(null)}
-        application={selectedApp}
-        onEdit={(app) => {
-          setSelectedApp(null);
-          setEditingApp(app);
-          setIsCreateOpen(true);
-        }}
-        onDelete={(app) => {
-          setSelectedApp(null);
-          setDeletingApp(app);
-        }}
-      />
+      {/* Microservice Detail Inspector Modal */}
+      {selectedApp && (
+        <ApplicationDetailModal
+          app={selectedApp}
+          isOpen={!!selectedApp}
+          onClose={() => setSelectedApp(null)}
+          onEdit={() => {
+            setEditingApp(selectedApp);
+            setSelectedApp(null);
+            setIsCreateOpen(true);
+          }}
+          onDelete={() => {
+            setDeletingApp(selectedApp);
+          }}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       <Modal
-        isOpen={Boolean(deletingApp)}
+        isOpen={!!deletingApp}
         onClose={() => setDeletingApp(null)}
-        title="Confirm Application Deletion"
-        subtitle="This action cascades and irreversibly removes all linked deployments, incidents and metrics."
+        title="Deregister Microservice"
+        subtitle="This action removes the microservice from Sentinel telemetry tracking."
       >
         <div className="space-y-4">
-          <div className="p-3.5 rounded-lg bg-rose-950/20 border border-rose-500/20 text-xs text-rose-300 flex items-start gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <p>
-              Are you sure you want to permanently delete{' '}
-              <strong className="text-white font-mono">
-                {deletingApp?.name}
-              </strong>
-              ? All historical telemetry and remediation records for this application will be removed.
-            </p>
+          <div className="p-4 rounded-xl border border-aurora-coral/30 bg-aurora-coral/10 text-white text-xs">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-aurora-coral shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-white">
+                  Confirm deregistration of microservice: {deletingApp?.name}?
+                </p>
+                <p className="mt-1 text-text-secondary">
+                  Associated metrics and deployment records will remain in the database, but active health checking will cease.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-2">
-            <Button variant="ghost" onClick={() => setDeletingApp(null)} disabled={isSubmitting}>
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button
+              variant="secondary"
+              onClick={() => setDeletingApp(null)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button
               variant="danger"
               onClick={handleDeleteApp}
               isLoading={isSubmitting}
-              icon={Trash2}
             >
-              Confirm Delete
+              Confirm Deregistration
             </Button>
           </div>
         </div>
@@ -389,4 +415,3 @@ export default function ApplicationsPage() {
     </div>
   );
 }
-

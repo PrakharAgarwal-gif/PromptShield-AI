@@ -13,7 +13,9 @@ import {
   AlertOctagon,
   ShieldCheck,
   Settings as SettingsIcon,
+  Zap,
 } from 'lucide-react';
+import { APP_CONFIG } from '@/utils/constants';
 
 const NAV_ITEMS = [
   { name: 'Overview', href: '/', icon: LayoutDashboard },
@@ -34,31 +36,34 @@ export default function MobileNav({ isOpen, onClose }) {
     <div className="fixed inset-0 z-50 lg:hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-space/85 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
       {/* Drawer */}
-      <div className="fixed inset-y-0 left-0 w-72 bg-surface border-r border-surface-border shadow-2xl flex flex-col justify-between">
+      <div className="fixed inset-y-0 left-0 w-72 bg-space-midnight border-r border-surface-border shadow-2xl flex flex-col justify-between">
         <div>
           {/* Header */}
-          <div className="h-16 flex items-center justify-between px-5 border-b border-surface-border bg-canvas">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sentinel-500 to-indigo-600 flex items-center justify-center text-white">
-                <Shield className="w-4 h-4" />
+          <div className="h-20 flex items-center justify-between px-6 border-b border-surface-border bg-space/60">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-aurora-cyan via-aurora-blue to-aurora-purple flex items-center justify-center shadow-glow-cyan text-white">
+                <Shield className="w-5 h-5" />
               </div>
-              <span className="font-bold text-sm text-white">CloudOps Sentinel</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-sm text-white">CloudOps<span className="text-aurora-cyan">.AI</span></span>
+                <span className="text-[9px] uppercase font-mono tracking-wider text-aurora-lavender">Sentinel SaaS</span>
+              </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-surface-elevated"
+              className="p-1.5 rounded-xl text-text-secondary hover:text-white hover:bg-surface-elevated border border-surface-border"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Nav Items */}
-          <nav className="p-4 space-y-1">
+          <nav className="p-4 space-y-1.5">
             {NAV_ITEMS.map((item) => {
               const isActive =
                 item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
@@ -69,13 +74,17 @@ export default function MobileNav({ isOpen, onClose }) {
                   key={item.name}
                   href={item.href}
                   onClick={onClose}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-sentinel-600 text-white'
-                      : 'text-slate-400 hover:text-white hover:bg-surface-muted'
+                      ? 'bg-gradient-to-r from-aurora-cyan/20 to-aurora-purple/10 text-white border-l-[3px] border-aurora-cyan shadow-glow-cyan'
+                      : 'text-text-secondary hover:text-white hover:bg-surface-elevated/60'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon
+                    className={`w-4 h-4 shrink-0 ${
+                      isActive ? 'text-aurora-cyan' : 'text-text-muted'
+                    }`}
+                  />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -83,11 +92,10 @@ export default function MobileNav({ isOpen, onClose }) {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-surface-border text-xs text-slate-500">
-          CloudOps Sentinel v0.1.0 • Enterprise Edition
+        <div className="p-4 border-t border-surface-border text-xs text-text-muted font-mono">
+          CloudOps Sentinel v{APP_CONFIG.version} • Aurora Neon
         </div>
       </div>
     </div>
   );
 }
-
