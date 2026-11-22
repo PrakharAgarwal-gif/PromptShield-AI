@@ -1,109 +1,56 @@
+version: '3.8'
+
 services:
-  # ==============================================================================
-  # Primary PostgreSQL Database Container
-  # ==============================================================================
   postgres:
-    image: postgres:16-alpine
-    container_name: cloudops-sentinel-postgres
-    restart: unless-stopped
+    image: postgres:15-alpine
+    container_name: cloudops-postgres
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-cloudops_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudops_secure_password}
       POSTGRES_DB: ${POSTGRES_DB:-cloudops_sentinel}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cloudops_user} -d ${POSTGRES_DB:-cloudops_sentinel}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U cloudops_user -d cloudops_sentinel"]
+      interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 5s
-    networks:
-      - sentinel-network
 
-  # ==============================================================================
-  # CloudOps Sentinel Backend API Container (FastAPI)
-  # ==============================================================================
-  api:
+  backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: cloudops-sentinel-api
-    restart: unless-stopped
+    container_name: cloudops-backend
+    restart: always
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      ENVIRONMENT: ${ENVIRONMENT:-production}
-      DEBUG: ${DEBUG:-false}
-      APP_NAME: cloudops-sentinel-api
-      APP_VERSION: 0.1.0
-      HOST: 0.0.0.0
-      PORT: 8000
+      ENVIRONMENT: production
+      DEBUG: "false"
+      HOST: "0.0.0.0"
+      PORT: "8000"
+      DATABASE_URL: postgresql+psycopg://cloudops_user:cloudops_secure_password@postgres:5432/cloudops_sentinel
+      JWT_SECRET: ${JWT_SECRET:-cloudops_super_secret_jwt_key_2026_sentinel}
       CORS_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000"]'
-      POSTGRES_SERVER: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: ${POSTGRES_USER:-cloudops_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudops_secure_password}
-      POSTGRES_DB: ${POSTGRES_DB:-cloudops_sentinel}
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-cloudops_user}:${POSTGRES_PASSWORD:-cloudops_secure_password}@postgres:5432/${POSTGRES_DB:-cloudops_sentinel}
-      LOG_LEVEL: INFO
-      RECOVERY_DRY_RUN_MODE: "true"
-      ENABLE_METRIC_SIMULATOR: "false"
     ports:
       - "8000:8000"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
-    networks:
-      - sentinel-network
 
-  # ==============================================================================
-  # CloudOps Sentinel Dashboard Frontend Container (Next.js)
-  # ==============================================================================
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
-    container_name: cloudops-sentinel-frontend
-    restart: unless-stopped
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cloudops-frontend
+    restart: always
     depends_on:
-      api:
-        condition: service_healthy
+      - backend
     environment:
-      NODE_ENV: production
-      PORT: 3000
-      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
-      INTERNAL_API_URL: http://api:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api
     ports:
       - "3000:3000"
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
-    networks:
-      - sentinel-network
 
-# ==============================================================================
-# Persistent Storage Volumes
-# ==============================================================================
 volumes:
   postgres_data:
-    name: cloudops_sentinel_postgres_data
-
-# ==============================================================================
-# Isolated Internal Network
-# ==============================================================================
-networks:
-  sentinel-network:
-    name: cloudops_sentinel_net
-    driver: bridge
