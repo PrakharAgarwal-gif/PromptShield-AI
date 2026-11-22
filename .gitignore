@@ -31,3 +31,6 @@ yarn-debug.log*
 yarn-error.log*
 .turbo/
 .DS_Store
+
+# Local Netlify folder
+.netlify
